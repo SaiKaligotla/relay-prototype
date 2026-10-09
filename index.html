@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay — AI Triage Copilot for Support Ops</title>
+<meta name="description" content="Relay is an AI triage copilot for B2B support operations. Prototype + case study.">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233b49df'/%3E%3Cpath d='M9 20l5-8 4 5 5-8' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ LEFT RAIL ============ -->
+  <nav class="rail" aria-label="Primary">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 16l5-8 4 5 7-9" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Relay</div>
+        <div class="brand-sub">Triage copilot</div>
+      </div>
+    </div>
+
+    <button class="ws" type="button">
+      <span class="ws-av" aria-hidden="true">V</span>
+      <span>
+        <span class="ws-n">Vantage</span>
+        <span class="ws-p">Support Ops · 14 agents</span>
+      </span>
+    </button>
+
+    <div class="nav-lbl">Work</div>
+    <button class="nav-i" data-view="queue" aria-current="page">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10" stroke-linecap="round"/></svg>
+      <span class="t">Triage queue</span><span class="nav-badge hot" id="nav-queue-count">0</span>
+    </button>
+    <button class="nav-i" data-view="insights">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" stroke-linecap="round"/></svg>
+      <span class="t">Insights</span>
+    </button>
+    <button class="nav-i" data-view="policies">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 3.5v5c0 4.5-3.2 8.3-8 9.5-4.8-1.2-8-5-8-9.5v-5L12 3z" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="t">AI policies</span>
+    </button>
+    <button class="nav-i" data-view="audit">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2" stroke-linecap="round"/></svg>
+      <span class="t">Audit log</span><span class="nav-badge" id="nav-audit-count">7</span>
+    </button>
+
+    <div class="nav-lbl">Portfolio</div>
+    <button class="nav-i" data-view="casestudy">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A1.5 1.5 0 015.5 4H10l2 2.5h6.5A1.5 1.5 0 0120 8v10.5A1.5 1.5 0 0118.5 20h-13A1.5 1.5 0 014 18.5v-13z" stroke-linejoin="round"/></svg>
+      <span class="t">Case study</span>
+    </button>
+
+    <div class="rail-foot">
+      <div class="model-chip">
+        <span class="dot" id="model-dot" aria-hidden="true"></span>
+        <span id="model-status">relay-triage 2.4.1 · healthy</span>
+      </div>
+      <div class="me">
+        <span class="me-av" aria-hidden="true">JO</span>
+        <span class="me-n" style="font-size:12px;color:var(--rail-dim);line-height:1.3">
+          <span style="display:block;color:var(--rail-text-hi);font-weight:550">J. Okafor</span>
+          <span style="font-size:10.5px;color:var(--rail-dim)">Support Ops Lead</span>
+        </span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <header class="topbar">
+      <div class="crumb">
+        <span>Vantage</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <b id="crumb-page">Triage queue</b>
+      </div>
+
+      <div class="search" role="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6" stroke-linecap="round"/></svg>
+        <label class="sr" for="q">Search tickets</label>
+        <input id="q" type="search" placeholder="Search tickets, companies…" autocomplete="off">
+        <span class="kbd">/</span>
+      </div>
+
+      <button class="iconbtn" id="theme-btn" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn sm" id="kbd-help" type="button" title="Keyboard shortcuts">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8" stroke-linecap="round"/></svg>
+        Shortcuts
+      </button>
+    </header>
+
+    <!-- Demo controls: makes the prototype self-explanatory to a viewer -->
+    <div class="demobar" role="group" aria-label="Prototype demo controls">
+      <span class="lbl">Demo states</span>
+      <button class="btn xs" data-demo="loading" type="button">Loading</button>
+      <button class="btn xs" data-demo="empty" type="button">Empty queue</button>
+      <button class="btn xs" data-demo="degraded" type="button">Model degraded</button>
+      <button class="btn xs" data-demo="error" type="button">Model timeout</button>
+      <button class="btn xs" data-demo="bulk" type="button">Bulk selection</button>
+      <button class="btn xs" data-demo="reset" type="button" style="margin-left:4px">Reset</button>
+      <span style="margin-left:auto;font-size:11px;color:var(--ink-3);white-space:nowrap">Synthetic data · no live model calls</span>
+    </div>
+
+    <!-- Degraded / error banner -->
+    <div class="banner" id="banner" role="status" aria-live="polite"></div>
+
+    <!-- ============ VIEW: QUEUE ============ -->
+    <section id="view-queue" style="display:flex;flex-direction:column;overflow:hidden;flex:1;min-height:0">
+      <div class="pagehead">
+        <h1>Triage queue</h1>
+        <p class="sub">Relay reads every inbound ticket, classifies intent, and proposes the next action. It acts alone only when it is confident <em>and</em> the action is reversible — everything else waits for you.</p>
+      </div>
+
+      <div class="strip" id="metric-strip"></div>
+
+      <div class="toolbar">
+        <div class="views" role="group" aria-label="Saved views">
+          <button class="view-b" data-filter-view="all" aria-pressed="true">All</button>
+          <button class="view-b" data-filter-view="needs_me" aria-pressed="false">Needs a human</button>
+          <button class="view-b" data-filter-view="auto" aria-pressed="false">AI acted</button>
+          <button class="view-b" data-filter-view="sla" aria-pressed="false">SLA at risk</button>
+        </div>
+
+        <label class="sr" for="f-status">Status</label>
+        <select class="filter" id="f-status">
+          <option value="">Any status</option>
+          <option value="new">New</option>
+          <option value="needs_human">Needs human</option>
+          <option value="triaged">Triaged</option>
+          <option value="in_progress">In progress</option>
+          <option value="resolved">Resolved</option>
+        </select>
+
+        <label class="sr" for="f-conf">Confidence</label>
+        <select class="filter" id="f-conf">
+          <option value="">Any confidence</option>
+          <option value="hi">High ≥ 0.90</option>
+          <option value="mid">Review 0.70–0.89</option>
+          <option value="lo">Unsure &lt; 0.70</option>
+        </select>
+
+        <label class="sr" for="f-team">Team</label>
+        <select class="filter" id="f-team"><option value="">Any team</option></select>
+
+        <button class="btn ghost sm" id="clear-filters" type="button">Clear</button>
+        <span class="spacer"></span>
+        <span class="count" id="row-count" aria-live="polite"></span>
+      </div>
+
+      <div class="tablewrap" id="tablewrap"></div>
+    </section>
+
+    <!-- ============ VIEW: INSIGHTS ============ -->
+    <section id="view-insights" style="display:none;flex:1;min-height:0;flex-direction:column">
+      <div class="pagehead">
+        <h1>Insights</h1>
+        <p class="sub">What the AI is actually doing to the operation — and whether its confidence means anything. Calibration is the metric that decides if a threshold can be trusted.</p>
+      </div>
+      <div class="wrap">
+        <div class="cards" id="insight-cards"></div>
+
+        <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(330px,1fr))">
+          <div class="card">
+            <h3>Is the confidence score honest?</h3>
+            <p class="hint">If the model says 0.9, it should be right ~90% of the time. Below 0.70 it is systematically over-confident — which is why that band never auto-acts and always shows "AI is unsure" rather than a guess.</p>
+            <div id="calib"></div>
+            <div class="legend">
+              <span><i class="sw" style="background:var(--brand)"></i> Measured accuracy</span>
+              <span><i class="sw" style="background:var(--brand-soft);border-right:2px dashed var(--brand)"></i> Claimed confidence</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Volume handled, last 7 days</h3>
+            <p class="hint">Solid bars are tickets Relay triaged end-to-end without a human touch. The gap between solid and outline is human work that still exists — the honest number to show a stakeholder.</p>
+            <div id="volume"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Where humans still override the AI</h3>
+          <p class="hint">Overrides are the product's most valuable input. Every one is captured with a reason and reviewed weekly — this table is the agenda for that review, not a scoreboard.</p>
+          <div id="overrides"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: POLICIES ============ -->
+    <section id="view-policies" style="display:none;flex:1;min-height:0;flex-direction:column">
+      <div class="pagehead">
+        <h1>AI policies</h1>
+        <p class="sub">Governance is a design surface, not a settings page buried in admin. These controls decide what Relay is allowed to do without a human — and every change is written to the audit log with a second approver.</p>
+      </div>
+      <div class="wrap">
+        <div class="policy-grid">
+          <div class="card">
+            <h3>Confidence gates</h3>
+            <p class="hint">Two thresholds, three behaviours. Anything below the review floor is never given a suggested answer — Relay asks a clarifying question instead.</p>
+            <div class="range-row">
+              <div class="range-head"><b>Auto-act at or above</b><span class="v" id="v-auto">0.90</span></div>
+              <input type="range" id="p-auto" min="0.5" max="1" step="0.01" value="0.90" aria-describedby="n-auto">
+              <div class="ticks"><span>0.50</span><span>0.75</span><span>1.00</span></div>
+              <div class="range-note" id="n-auto">At 0.90 the model is measured-correct 96% of the time. Dropping to 0.85 would auto-act on ~340 more tickets a week but pushes error rate to 1 in 7.</div>
+            </div>
+            <div class="range-row">
+              <div class="range-head"><b>Ask a human below</b><span class="v" id="v-review">0.70</span></div>
+              <input type="range" id="p-review" min="0.3" max="0.9" step="0.01" value="0.70" aria-describedby="n-review">
+              <div class="ticks"><span>0.30</span><span>0.60</span><span>0.90</span></div>
+              <div class="range-note" id="n-review">Below this, Relay withholds its answer and asks the customer one scoping question. Guessing here mis-routes 4 in 10 tickets.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Hard limits</h3>
+            <p class="hint">These override the confidence score entirely. A 0.99-confident action on a $400k contract still stops for a human — reversibility and blast radius are the real risk model, not accuracy.</p>
+            <div id="guards"></div>
+          </div>
+
+          <div class="card">
+            <h3>Transparency to the customer</h3>
+            <p class="hint">Trust is built on the customer's side too, not just the agent's. These are on by default and turning any of them off requires a second approver.</p>
+            <div id="disclosure"></div>
+          </div>
+
+          <div class="card">
+            <h3>Undo window</h3>
+            <p class="hint">Every automated action stays reversible. This is what makes auto-act acceptable to a risk-averse support org — the failure mode is "click undo", not "customer got the wrong answer".</p>
+            <div class="range-row">
+              <div class="range-head"><b>Reversible for</b><span class="v" id="v-undo">24h</span></div>
+              <input type="range" id="p-undo" min="1" max="72" step="1" value="24" aria-describedby="n-undo">
+              <div class="ticks"><span>1h</span><span>36h</span><span>72h</span></div>
+              <div class="range-note" id="n-undo">Covers every shift handover plus a weekend. 91% of overrides happen inside the first 2 hours.</div>
+            </div>
+            <div class="callout warn" style="margin-top:10px">
+              <b>Trade-off accepted</b>
+              <span class="sub">A longer undo window means more tickets where the "final" state is provisional. Support leads preferred that ambiguity over irreversible automation.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: AUDIT ============ -->
+    <section id="view-audit" style="display:none;flex:1;min-height:0;flex-direction:column">
+      <div class="pagehead">
+        <h1>Audit log</h1>
+        <p class="sub">Every automated action, every human override, every policy change, every model degradation. Filterable, exportable, and written to before the UI updates — so a crash never loses the record.</p>
+      </div>
+      <div class="wrap">
+        <div class="toolbar" style="padding:14px 0">
+          <label class="sr" for="a-type">Event type</label>
+          <select class="filter" id="a-type">
+            <option value="">All events</option>
+            <option value="auto_route">AI auto-action</option>
+            <option value="override">Human override</option>
+            <option value="accept">Human accepted AI</option>
+            <option value="ask_clarifier">AI withheld an answer</option>
+            <option value="degraded">Model degraded</option>
+            <option value="policy_change">Policy change</option>
+          </select>
+          <button class="btn sm" id="export-audit" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Export CSV
+          </button>
+          <span class="spacer"></span>
+          <span class="count" id="audit-count"></span>
+        </div>
+        <div id="audit-table"></div>
+      </div>
+    </section>
+
+    <!-- ============ VIEW: CASE STUDY ============ -->
+    <section id="view-casestudy" style="display:none;flex:1;min-height:0;flex-direction:column">
+      <div class="wrap" style="padding-top:26px">
+        <div class="cs" id="cs-body"></div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ============ BULK BAR ============ -->
+<div class="bulkbar" id="bulkbar" role="region" aria-label="Bulk actions">
+  <span class="n" id="bulk-n">0 selected</span>
+  <button class="btn sm acc" data-bulk="accept" type="button">Accept AI suggestions</button>
+  <button class="btn sm" data-bulk="route" type="button">Route to…</button>
+  <button class="btn sm" data-bulk="tag" type="button">Add tag</button>
+  <button class="btn sm" data-bulk="escalate" type="button">Escalate</button>
+  <button class="btn sm ghost" data-bulk="clear" type="button">Clear</button>
+</div>
+
+<!-- ============ DRAWER ============ -->
+<div class="drawer-scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dr-title" tabindex="-1">
+  <div class="dr-head">
+    <div class="dr-top">
+      <div style="flex:1;min-width:0">
+        <div class="tid" id="dr-id"></div>
+        <h2 id="dr-title"></h2>
+      </div>
+      <button class="iconbtn" id="dr-close" type="button" aria-label="Close ticket detail">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="dr-meta" id="dr-meta"></div>
+  </div>
+  <div class="dr-body" id="dr-body"></div>
+  <div class="dr-foot" id="dr-foot"></div>
+</aside>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-scrim" id="modal-scrim">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h3 id="modal-title"></h3>
+    <div class="mbody" id="modal-body"></div>
+    <div class="mfoot" id="modal-foot"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+<div class="live" id="live-region" role="status" aria-live="polite"></div>
+
+<script src="js/data.js"></script>
+<script src="js/casestudy.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
